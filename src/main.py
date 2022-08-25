@@ -1,5 +1,6 @@
 import os
 import cv2
+import json
 from dotenv import load_dotenv
 import supervisely as sly
 
@@ -21,12 +22,12 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
         super().__init__(model_dir)
 
         ####### CODE FOR DETECTRON2 MODEL STARTS #######
+        with open(os.path.join(model_dir, "model_info.json"), "r") as myfile:
+            model_info = json.loads(myfile.read())
         cfg = get_cfg()
         cfg.merge_from_file(
             # Initialize Detectron2 model from config
-            model_zoo.get_config_file(
-                "COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"
-            )
+            model_zoo.get_config_file(model_info["architecture"])
         )
         cfg.MODEL.DEVICE = "cpu"
         cfg.MODEL.WEIGHTS = os.path.join(model_dir, "model_weights.pkl")
