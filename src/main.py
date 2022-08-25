@@ -1,4 +1,5 @@
 import os
+from typing import Literal
 import cv2
 import json
 from dotenv import load_dotenv
@@ -9,6 +10,12 @@ from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 
+try:
+    from typing import Literal
+except ImportError:
+    # for compatibility with python 3.7
+    from typing_extensions import Literal
+
 load_dotenv("local.env")
 load_dotenv(os.path.expanduser("~/supervisely.env"))
 
@@ -18,7 +25,11 @@ load_dotenv(os.path.expanduser("~/supervisely.env"))
 
 
 class MyModel(sly.nn.inference.InstanceSegmentation):
-    def __init__(self, model_dir: str = None):
+    def __init__(
+        self,
+        model_dir: str = None,
+        device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
+    ):
         super().__init__(model_dir)
 
         ####### CODE FOR DETECTRON2 MODEL STARTS #######
@@ -29,7 +40,7 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
             # Initialize Detectron2 model from config
             model_zoo.get_config_file(model_info["architecture"])
         )
-        cfg.MODEL.DEVICE = "cpu"
+        cfg.MODEL.DEVICE = "cpu"  # torch.device("cuda")
         cfg.MODEL.WEIGHTS = os.path.join(model_dir, "model_weights.pkl")
 
         self.predictor = DefaultPredictor(cfg)
@@ -64,9 +75,9 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
 
 team_id = int(os.environ["context.teamId"])
 model_dir = os.environ["context.slyFolder"]
-# TODO: get GPU device
+device = os.environ.get("modal.state.device", "cpu")
 
-m = MyModel(model_dir)
+m = MyModel(model_dir, device)
 
 if sly.is_production():
     # code below is running on Supervisely platform in production

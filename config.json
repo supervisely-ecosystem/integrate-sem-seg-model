@@ -1,0 +1,27 @@
+{
+  "entrypoint": "python -m uvicorn src.main:m.app --host 0.0.0.0 --port 8000",
+  "port": 8000,
+  "headless": true,
+  "name": "Serve custom instance segemntation model",
+  "description": "Demonstrates how to integrate your custom model",
+  "categories": [
+    "neural network",
+    "images",
+    "videos",
+    "instance segmentation",
+    "segmentation & tracking",
+    "serve",
+    "development"
+  ],
+  "icon": "some url",
+  "poster": "some url",
+  "modal_template_state": {
+    "device": "cpu"
+  },
+  "context_menu": {
+    "target": ["images_project"],
+    "context_root": "Report"
+  },
+  "session_tags": ["deployed_nn"],
+  "community_agent": false
+}
