@@ -1,20 +1,18 @@
+from distutils.log import warn
 import os
-from typing import Literal
+from typing import Literal, List
 import cv2
 import json
 from dotenv import load_dotenv
 import supervisely as sly
+from typing_extensions import Literal
 
 from detectron2 import model_zoo
 from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 
-try:
-    from typing import Literal
-except ImportError:
-    # for compatibility with python 3.7
-    from typing_extensions import Literal
+from supervisely.app.widgets import card
 
 load_dotenv("local.env")
 load_dotenv(os.path.expanduser("~/supervisely.env"))
@@ -25,13 +23,10 @@ load_dotenv(os.path.expanduser("~/supervisely.env"))
 
 
 class MyModel(sly.nn.inference.InstanceSegmentation):
-    def __init__(
+    def load_on_device(
         self,
-        model_dir: str = None,
         device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
     ):
-        super().__init__(model_dir)
-
         ####### CODE FOR DETECTRON2 MODEL STARTS #######
         with open(os.path.join(model_dir, "model_info.json"), "r") as myfile:
             model_info = json.loads(myfile.read())
@@ -40,7 +35,7 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
             # Initialize Detectron2 model from config
             model_zoo.get_config_file(model_info["architecture"])
         )
-        cfg.MODEL.DEVICE = "cpu"  # torch.device("cuda")
+        cfg.MODEL.DEVICE = device  # learn more in torch.device
         cfg.MODEL.WEIGHTS = os.path.join(model_dir, "model_weights.pkl")
 
         self.predictor = DefaultPredictor(cfg)
@@ -48,7 +43,7 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
             "thing_classes"
         )
         ####### CODE FOR DETECTRON2 MODEL ENDS #########
-        print("Model has been successfully loaded on device")
+        print(f"✅ Model has been successfully loaded on {device} device")
 
     def get_classes(self) -> list[str]:
         return self.class_names  # ["cat", "dog", ...]
@@ -74,10 +69,10 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
 
 
 team_id = int(os.environ["context.teamId"])
-model_dir = os.environ["context.slyFolder"]
-device = os.environ.get("modal.state.device", "cpu")
+model_dir = os.path.abspath(os.environ["context.slyFolder"])
+device = os.environ.get("modal.state.device", "cpu")  # @TODO: reimplement
 
-m = MyModel(model_dir, device)
+m = MyModel(model_dir)
 
 if sly.is_production():
     # code below is running on Supervisely platform in production
@@ -85,6 +80,7 @@ if sly.is_production():
     m.serve()
 else:
     # for local development and debugging
+    m.load_on_device("cpu")
     image_path = "./demo_data/image_01.jpg"
     confidence_threshold = 0.7
     results = m.predict(image_path, confidence_threshold)

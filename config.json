@@ -15,9 +15,6 @@
   ],
   "icon": "some url",
   "poster": "some url",
-  "modal_template_state": {
-    "device": "cpu"
-  },
   "context_menu": {
     "target": ["images_project"],
     "context_root": "Report"

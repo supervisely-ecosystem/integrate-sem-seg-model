@@ -29,12 +29,12 @@
                 "websockets"
             ],
             "jinja": true,
-            "justMyCode": true,
+            // "justMyCode": true,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}:${PYTHONPATH}",
                 "LOG_LEVEL": "DEBUG",
                 "ENV": "production",
-                "DEBUG_WITH_SLY_NET": "1",
+                // "DEBUG_WITH_SLY_NET": "1",
                 "SLY_APP_DATA_DIR": "${workspaceFolder}/results"
             }
         }
