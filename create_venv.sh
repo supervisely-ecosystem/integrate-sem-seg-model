@@ -14,7 +14,7 @@ python3 -m venv .venv && \
 source .venv/bin/activate && \
 
 echo "Install requirements..." && \
-pip3 install -r requirements.txt && \
+pip3 install -r dev_requirements.txt && \
 
 arch=$(uname -m)
 ARCHFLAGS="-arch x86_64" 
@@ -27,7 +27,6 @@ CC=clang CXX=clang++ ARCHFLAGS=$ARCHFLAGS python3 -m pip install git+https://git
 
 # pycocotools via the github repo instead of pypi for better compatibility 
 pip install "git+https://github.com/open-mmlab/cocoapi.git#subdirectory=pycocotools"
-# ARCHFLAGS=$ARCHFLAGS python3 -m pip install -U pycocotools
 
 echo "Requirements have been successfully installed" && \
 
