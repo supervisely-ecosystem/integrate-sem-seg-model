@@ -1,4 +1,6 @@
 {
+  "type": "app",
+  "version": "2.0.0",
   "name": "Serve custom instance segmentation model",
   "description": "Learn how to integrate your custom model in readme",
   "categories": [
