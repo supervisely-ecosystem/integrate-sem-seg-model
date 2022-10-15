@@ -25,21 +25,16 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
         self,
         device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
     ):
-        ####### CODE FOR DETECTRON2 MODEL STARTS #######
+        ####### CUSTOM CODE FOR MY MODEL STARTS (e.g. DETECTRON2) #######
         with open(os.path.join(self.model_dir, "model_info.json"), "r") as myfile:
-            model_info = json.loads(myfile.read())
+            architecture = json.loads(myfile.read())["architecture"]
         cfg = get_cfg()
-        cfg.merge_from_file(
-            # Initialize Detectron2 model from config
-            model_zoo.get_config_file(model_info["architecture"])
-        )
+        cfg.merge_from_file(model_zoo.get_config_file(architecture))
         cfg.MODEL.DEVICE = device  # learn more in torch.device
         cfg.MODEL.WEIGHTS = os.path.join(self.model_dir, "model_weights.pkl")
-
         self.predictor = DefaultPredictor(cfg)
         self.class_names = MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).get("thing_classes")
-        ####### CODE FOR DETECTRON2 MODEL ENDS #########
-
+        ####### CUSTOM CODE FOR MY MODEL ENDS (e.g. DETECTRON2)  ########
         print(f"✅ Model has been successfully loaded on {device.upper()} device")
 
     def get_classes(self) -> List[str]:
