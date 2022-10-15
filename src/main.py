@@ -12,8 +12,11 @@ from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog
 
+from src.demo_data import prepare_weights
+
 load_dotenv("local.env")
 load_dotenv(os.path.expanduser("~/supervisely.env"))
+prepare_weights()  # prepare demo data automatically for convenient debug
 
 # code for detectron2 inference copied from official COLAB tutorial (inference section):
 # https://colab.research.google.com/drive/16jcaJoc6bCFAQ96jDe2HwtXj7BMD_-m5
@@ -31,7 +34,7 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
         cfg = get_cfg()
         cfg.merge_from_file(model_zoo.get_config_file(architecture))
         cfg.MODEL.DEVICE = device  # learn more in torch.device
-        cfg.MODEL.WEIGHTS = os.path.join(self.model_dir, "model_weights.pkl")
+        cfg.MODEL.WEIGHTS = os.path.join(self.model_dir, "weights.pkl")
         self.predictor = DefaultPredictor(cfg)
         self.class_names = MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).get("thing_classes")
         ####### CUSTOM CODE FOR MY MODEL ENDS (e.g. DETECTRON2)  ########
