@@ -12,6 +12,8 @@
     "serve",
     "development"
   ],
+  "icon": "some url",
+  "poster": "some url",
   "context_menu": {
     "target": ["files_folder"]
   },
