@@ -19,7 +19,7 @@ load_dotenv(os.path.expanduser("~/supervisely.env"))
 prepare_weights()  # prepare demo data automatically for convenient debug
 
 
-class MyModel(sly.nn.inference.InstanceSegmentation):
+class MyModel(sly.nn.inference.SemanticSegmentation):
     def load_on_device(
         self,
         device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
@@ -43,20 +43,16 @@ class MyModel(sly.nn.inference.InstanceSegmentation):
 
     def predict(
         self, image_path: str, settings: Dict[str, Any]
-    ) -> List[sly.nn.PredictionMask]:
+    ) -> List[sly.nn.SemanticPrediction]:
 
         ####### CUSTOM CODE FOR MY MODEL STARTS (e.g. DETECTRON2) #######
         segmented_image = inference_segmentor(self.model, image_path)[0]  # get predictions from Detectron2 model
 
         ####### CUSTOM CODE FOR MY MODEL ENDS (e.g. DETECTRON2)  ########
-        image_classes = np.unique(segmented_image)
         
-        results = []
-        for class_idx in image_classes:
-            class_name = self.class_names[class_idx]
-            mask = segmented_image == class_idx
-            results.append(sly.nn.PredictionMask(class_name, mask))
-        return results
+        class_id2name_mapping = { idx: name for idx, name in  enumerate(self.class_names)}
+
+        return [sly.nn.SemanticPrediction(segmented_image, class_id2name_mapping)]
 
 model_dir = sly.env.folder()
 print("Model directory:", model_dir)
