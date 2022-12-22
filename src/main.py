@@ -43,16 +43,13 @@ class MyModel(sly.nn.inference.SemanticSegmentation):
 
     def predict(
         self, image_path: str, settings: Dict[str, Any]
-    ) -> List[sly.nn.SemanticPrediction]:
+    ) -> List[sly.nn.PredictionSegmentation]:
 
         ####### CUSTOM CODE FOR MY MODEL STARTS (e.g. DETECTRON2) #######
         segmented_image = inference_segmentor(self.model, image_path)[0]  # get predictions from Detectron2 model
-
         ####### CUSTOM CODE FOR MY MODEL ENDS (e.g. DETECTRON2)  ########
-        
-        class_id2name_mapping = { idx: name for idx, name in  enumerate(self.class_names)}
 
-        return [sly.nn.SemanticPrediction(segmented_image, class_id2name_mapping)]
+        return [sly.nn.PredictionSegmentation(segmented_image)]
 
 model_dir = sly.env.folder()
 print("Model directory:", model_dir)
