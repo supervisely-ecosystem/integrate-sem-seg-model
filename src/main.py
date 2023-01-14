@@ -23,10 +23,10 @@ class MyModel(sly.nn.inference.SemanticSegmentation):
     def load_on_device(
         self,
         device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
-    ): 
+    ):
         ####### CUSTOM CODE FOR MY MODEL STARTS (e.g. MMSEGMENTATION) #######
         cfg = Config.fromfile(os.path.join(self.location, "model_config.py"))
-        self.model = build_segmentor(cfg.model, test_cfg=cfg.get('test_cfg'))
+        self.model = build_segmentor(cfg.model, test_cfg=cfg.get("test_cfg"))
         weights_path = os.path.join(self.location, "weights.pth")
         checkpoint = load_checkpoint(self.model, weights_path, map_location=device)
         self.class_names = checkpoint["meta"]["CLASSES"]
@@ -46,10 +46,11 @@ class MyModel(sly.nn.inference.SemanticSegmentation):
     ) -> List[sly.nn.PredictionSegmentation]:
 
         ####### CUSTOM CODE FOR MY MODEL STARTS (e.g. DETECTRON2) #######
-        segmented_image = inference_segmentor(self.model, image_path)[0]  # get predictions from Detectron2 model
+        segmented_image = inference_segmentor(self.model, image_path)[0]
         ####### CUSTOM CODE FOR MY MODEL ENDS (e.g. DETECTRON2)  ########
 
         return [sly.nn.PredictionSegmentation(segmented_image)]
+
 
 model_dir = sly.env.folder()
 print("Model directory:", model_dir)
