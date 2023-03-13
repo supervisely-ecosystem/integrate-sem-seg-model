@@ -12,22 +12,25 @@ from mmcv.runner import load_checkpoint
 from mmseg.models import build_segmentor
 from mmseg.apis.inference import inference_segmentor, init_segmentor
 
-from src.demo_data import prepare_weights
 
 load_dotenv("local.env")
 load_dotenv(os.path.expanduser("~/supervisely.env"))
-prepare_weights()  # prepare demo data automatically for convenient debug
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print("Using device:", device)
+
+weights_url = "https://download.openmmlab.com/mmsegmentation/v0.5/poolformer/fpn_poolformer_s12_8x4_512x512_40k_ade20k/fpn_poolformer_s12_8x4_512x512_40k_ade20k_20220501_115154-b5aa2f49.pth"
 
 class MyModel(sly.nn.inference.SemanticSegmentation):
     def load_on_device(
         self,
+        model_dir: str,
         device: Literal["cpu", "cuda", "cuda:0", "cuda:1", "cuda:2", "cuda:3"] = "cpu",
     ):
         ####### CUSTOM CODE FOR MY MODEL STARTS (e.g. MMSEGMENTATION) #######
-        cfg = Config.fromfile(os.path.join(self.location, "model_config.py"))
+        weights_path = self.download(weights_url)
+        cfg = Config.fromfile(os.path.join(model_dir, "model_config.py"))
         self.model = build_segmentor(cfg.model, test_cfg=cfg.get("test_cfg"))
-        weights_path = os.path.join(self.location, "weights.pth")
         checkpoint = load_checkpoint(self.model, weights_path, map_location=device)
         self.class_names = checkpoint["meta"]["CLASSES"]
         self.model.CLASSES = self.class_names
@@ -52,14 +55,10 @@ class MyModel(sly.nn.inference.SemanticSegmentation):
         return [sly.nn.PredictionSegmentation(segmented_image)]
 
 
-model_dir = sly.env.folder()
-print("Model directory:", model_dir)
+model_dir = "my_model"  # model weights will be downloaded into this dir
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print("Using device:", device)
-
-m = MyModel(location=model_dir)
-m.load_on_device(device)
+m = MyModel(model_dir=model_dir)
+m.load_on_device(model_dir=model_dir, device=device)
 
 if sly.is_production():
     # this code block is running on Supervisely platform in production

@@ -4,4 +4,5 @@ supervisely
 *.pth
 __pycache__
 results
+/app_data
 # demo_data/image_01_prediction.jpg
