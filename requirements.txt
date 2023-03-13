@@ -1,3 +1,4 @@
+-f https://download.openmmlab.com/mmcv/dist/cu117/torch1.13/index.html 
 supervisely==6.69.70
 torch==1.13.0
 torchvision==0.14.0
@@ -6,4 +7,4 @@ mmcv-full==1.7.0
 mmsegmentation==0.29.1
 mmcls==0.24.1
 ffmpeg-python==0.2.0
-pyyaml==6.0w
+pyyaml==6.0
