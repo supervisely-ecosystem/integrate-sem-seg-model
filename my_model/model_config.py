@@ -1,36 +1,28 @@
 # model settings
 norm_cfg = dict(type='SyncBN', requires_grad=True)
-checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/poolformer/poolformer-s12_3rdparty_32xb128_in1k_20220414-f8d83051.pth'  # noqa
-custom_imports = dict(imports='mmcls.models', allow_failed_imports=False)
 model = dict(
     type='EncoderDecoder',
+    pretrained='pretrain/mit_b3.pth',
     backbone=dict(
-        type='mmcls.PoolFormer',
-        arch='s12',
-        init_cfg=dict(
-            type='Pretrained', checkpoint=checkpoint_file, prefix='backbone.'),
-        in_patch_size=7,
-        in_stride=4,
-        in_pad=2,
-        down_patch_size=3,
-        down_stride=2,
-        down_pad=1,
-        drop_rate=0.,
-        drop_path_rate=0.,
-        out_indices=(0, 2, 4, 6),
-        frozen_stages=0,
-    ),
-    neck=dict(
-        type='FPN',
-        in_channels=[64, 128, 320, 512],
-        out_channels=256,
-        num_outs=4),
+        type='MixVisionTransformer',
+        in_channels=3,
+        embed_dims=64,
+        num_stages=4,
+        num_layers=[3, 4, 18, 3],
+        num_heads=[1, 2, 5, 8],
+        patch_sizes=[7, 3, 3, 3],
+        sr_ratios=[8, 4, 2, 1],
+        out_indices=(0, 1, 2, 3),
+        mlp_ratio=4,
+        qkv_bias=True,
+        drop_rate=0.0,
+        attn_drop_rate=0.0,
+        drop_path_rate=0.1),
     decode_head=dict(
-        type='FPNHead',
-        in_channels=[256, 256, 256, 256],
+        type='SegformerHead',
+        in_channels=[64, 128, 320, 512],
         in_index=[0, 1, 2, 3],
-        feature_strides=[4, 8, 16, 32],
-        channels=128,
+        channels=256,
         dropout_ratio=0.1,
         num_classes=150,
         norm_cfg=norm_cfg,
@@ -90,12 +82,11 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(2048, 512),
+        img_scale=(960, 512),
         # img_ratios=[0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
-            dict(type='ResizeToMultiple', size_divisor=32),
             dict(type='RandomFlip'),
             dict(type='Normalize', **img_norm_cfg),
             dict(type='ImageToTensor', keys=['img']),
